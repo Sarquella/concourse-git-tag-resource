@@ -111,14 +111,25 @@ filter_tags() {
   done
 }
 
-format_output() {
-  log "Formatting output"
+get_commits() {
+  log "Retrieving commits"
 
   local tags=$1
 
-  output=""
   for tag in $tags; do
-    output+="{tag: \"$tag\"}"
+    echo $(git rev-list -n 1 $tag)
+  done
+}
+
+format_output() {
+  log "Formatting output"
+
+  read -r -a out_tags <<< $1
+  read -r -a out_commits <<< $2
+
+  output=""
+  for i in ${!out_tags[@]}; do
+    output+="{tag: \"${out_tags[$i]}\", commit: \"${out_commits[$i]}\"}"
   done
 
   echo "[$output]" | sed "s/}{/},{/g"

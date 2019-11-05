@@ -27,6 +27,8 @@ update_tags
 tags=$(get_tags)
 filtered_tags=$(filter_tags "$tags" "$tag_filter")
 
-output=$(format_output "$filtered_tags")
+commits=$(get_commits "$filtered_tags")
+
+output=$(format_output "$filtered_tags" "$commits")
 
 jq -n "$output" >&3
