@@ -23,8 +23,10 @@ parse_source $payload
 destination=$TMPDIR/git-tag-resource-repo-cache
 clone_repo $destination
 
+update_tags
+tags=$(get_tags)
+filtered_tags=$(filter_tags "$tags" "$tag_filter")
 
-jq -n "[{
-  ref: \"$tag\",
-  uri: \"$uri\"
-  }]" >&3
+output=$(format_output "$filtered_tags")
+
+jq -n "$output" >&3

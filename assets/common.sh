@@ -63,7 +63,7 @@ parse_source() {
   log "Parsing source"
 
   uri=$(jq -r '.source.uri // ""' < $payload)
-  tag=$(jq -r '.source.tag // ""' < $payload)
+  tag_filter=$(jq -r '.source.tag_filter // "*"' < $payload)
 }
 
 clone_repo() {
@@ -83,4 +83,43 @@ clone_repo() {
     cd $destination
     git reset --hard FETCH_HEAD
   fi
+}
+
+update_tags() {
+  log "Updating tags"
+
+  git tag -l | xargs git tag -d #Delete all local tags
+  git fetch --tags #Fetch tags to be up to date with remote
+}
+
+get_tags() {
+  log "Retrieving tags"
+
+  echo "$(git tag)"
+}
+
+filter_tags() {
+  local tags=$1
+  local filter=$2
+
+  log "Filtering tags matching $filter"
+
+  for tag in $tags; do
+    if [[ $tag == $filter ]]; then
+      echo $tag
+    fi 
+  done
+}
+
+format_output() {
+  log "Formatting output"
+
+  local tags=$1
+
+  output=""
+  for tag in $tags; do
+    output+="{tag: \"$tag\"}"
+  done
+
+  echo "[$output]" | sed "s/}{/},{/""
 }
