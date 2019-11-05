@@ -28,7 +28,7 @@ configure_git $payload
 parse_source $payload
 parse_version $payload
 
-clone_repo $destinatio
+clone_repo $destination
 
 checkout_commit $commit
 
