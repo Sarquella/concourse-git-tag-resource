@@ -21,7 +21,7 @@ configure_git $payload
 parse_source $payload
 
 
-jq -n "{
+jq -n "[{
   ref: \"$tag\",
   uri: \"$uri\"
-}" >&3
+  }]" >&3
