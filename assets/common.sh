@@ -124,12 +124,12 @@ get_commits() {
 format_output() {
   log "Formatting output"
 
-  read -r -a out_tags <<< $1
-  read -r -a out_commits <<< $2
+  local tags=($1)
+  local commits=($2)
 
   output=""
-  for i in ${!out_tags[@]}; do
-    output+="{tag: \"${out_tags[$i]}\", commit: \"${out_commits[$i]}\"}"
+  for i in ${!tags[@]}; do
+    output+="{tag: \"${tags[$i]}\", commit: \"${commits[$i]}\"}"
   done
 
   echo "[$output]" | sed "s/}{/},{/g"
