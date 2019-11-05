@@ -121,5 +121,5 @@ format_output() {
     output+="{tag: \"$tag\"}"
   done
 
-  echo "[$output]" | sed "s/}{/},{/"
+  echo "[$output]" | sed "s/}{/},{/g"
 }
