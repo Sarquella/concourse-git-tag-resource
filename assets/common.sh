@@ -66,11 +66,17 @@ parse_source() {
   tag_filter=$(jq -r '.source.tag_filter // "*"' < $payload)
 }
 
+parse_version() {
+  local payload=$1
+
+  log "Parsing version"
+
+  tag=$(jq -r '.version.tag // ""' < $payload)
+  commit=$(jq -r '.version.commit // ""' < $payload)
+}
+
 clone_repo() {
   local destination=$1
-
-  # We're just checking for commits and tags; we don't ever need to fetch LFS files here!
-  export GIT_LFS_SKIP_SMUDGE=1
 
   if [ ! -d "$destination/.git" ]; then
     log "Cloning $uri in $destination"
@@ -83,6 +89,14 @@ clone_repo() {
     cd $destination
     git reset --hard FETCH_HEAD
   fi
+}
+
+checkout_commit() {
+  local commit=$1
+
+  log "Checking out to $commit"
+
+  git checkout $commit
 }
 
 update_tags() {
@@ -112,9 +126,9 @@ filter_tags() {
 }
 
 get_commits() {
-  log "Retrieving commits"
-
   local tags=$1
+
+  log "Retrieving commits"
 
   for tag in $tags; do
     echo $(git rev-list -n 1 $tag)
@@ -122,10 +136,10 @@ get_commits() {
 }
 
 format_output() {
-  log "Formatting output"
-
   local tags=($1)
   local commits=($2)
+
+  log "Formatting output"
 
   output=""
   for i in ${!tags[@]}; do

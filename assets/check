@@ -20,6 +20,7 @@ configure_git $payload
 
 parse_source $payload
 
+export GIT_LFS_SKIP_SMUDGE=1 # We're just checking for commits and tags; we don't ever need to fetch LFS files here!
 destination=$TMPDIR/git-tag-resource-repo-cache
 clone_repo $destination
 
