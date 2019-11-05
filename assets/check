@@ -12,13 +12,13 @@ source $(dirname $0)/utils.sh
 # for jq
 PATH=/usr/local/bin:$PATH
 
-payload=$TMPDIR/git-resource-request
+payload=$TMPDIR/git-tag-resource-request
 
 cat > $payload <&0
 
-configure_git "$payload"
+configure_git $payload
 
-parse_source "$payload"
+parse_source $payload
 
 
 jq -n "{

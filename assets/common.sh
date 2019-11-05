@@ -40,25 +40,25 @@ configure_credentials() {
 }
 
 configure_git_global() {
-  local git_config_payload=$(jq -r '.source.git_config // []' < $1)
+  local git_config_payload="${$(jq -r '.source.git_config // []' < $1)}"
   eval $(echo "$git_config_payload" | \
     jq -r ".[] | \"git config --global '\\(.name)' '\\(.value)'; \"")
 }
 
 configure_git() {
-  local payload="$1"
+  local payload=$1
 
   log "Configuring git credentials"
 
-  load_pubkey "$payload"
-  configure_git_ssl_verification "$payload"
-  configure_credentials "$payload"
-  configure_git_global "$payload"
+  load_pubkey $payload
+  configure_git_ssl_verification $payload
+  configure_credentials $payload
+  configure_git_global $payload
 
 }
 
 parse_source() {
-  local payload="$1"
+  local payload=$1
 
   log "Parsing source"
 
