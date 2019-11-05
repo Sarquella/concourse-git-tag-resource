@@ -22,6 +22,6 @@ parse_source $payload
 
 
 jq -n "{
-  ref: ${tag},
-  uri: ${uri}
+  ref: \"$tag\",
+  uri: \"$uri\"
 }" >&3
