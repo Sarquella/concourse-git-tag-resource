@@ -20,4 +20,8 @@ configure_git "$payload"
 
 parse_source "$payload"
 
-echo "[{ ref: \"none\",  uri: \"$uri\", tag: \"$tag\" }]"
+
+jq -n "{
+  ref: $tag,
+  uri: $uri
+}" >&3
