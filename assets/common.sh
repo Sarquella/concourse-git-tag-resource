@@ -65,3 +65,22 @@ parse_source() {
   uri=$(jq -r '.source.uri // ""' < $payload)
   tag=$(jq -r '.source.tag // ""' < $payload)
 }
+
+clone_repo() {
+  local destination=$1
+
+  # We're just checking for commits and tags; we don't ever need to fetch LFS files here!
+  export GIT_LFS_SKIP_SMUDGE=1
+
+  if [ ! -d "$destination/.git" ]; then
+    log "Cloning $uri in $destination"
+
+    git clone --single-branch "$uri" "$destination"
+    cd $destination
+  else
+    log "Reseting $uri in $destination"
+
+    cd $destination
+    git reset --hard FETCH_HEAD
+  fi
+}

@@ -20,6 +20,9 @@ configure_git $payload
 
 parse_source $payload
 
+destination=$TMPDIR/git-tag-resource-repo-cache
+clone_repo $destination
+
 
 jq -n "[{
   ref: \"$tag\",
