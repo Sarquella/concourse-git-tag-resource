@@ -56,3 +56,12 @@ configure_git() {
   configure_git_global "$payload"
 
 }
+
+parse_source() {
+  local payload="$1"
+
+  log "Parsing source"
+
+  uri=$(jq -r '.source.uri // ""' < $payload)
+  tag=$(jq -r '.source.tag // ""' < $payload)
+}

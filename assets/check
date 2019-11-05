@@ -18,4 +18,6 @@ cat > $payload <&0
 
 configure_git "$payload"
 
-echo '[{ "ref": "none",  "message": "Hello World!" }]'
+parse_source "$payload"
+
+echo "[{ ref: \"none\",  uri: \"$uri\", tag: \"$tag\" }]"
