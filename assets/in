@@ -34,4 +34,4 @@ checkout_commit $commit
 
 #TODO Retrieve and use useful metadata
 metadata_key="commit"
-jq -n "{version: \"$commit\", metadata: [{name: \"commit\", value: \"$commit\"}]}" >&3
+jq -n "{version: $(jq '.version' < "$payload"), metadata: [{name: \"commit\", value: \"$commit\"}]}" >&3
