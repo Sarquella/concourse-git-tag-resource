@@ -80,12 +80,12 @@ clone_repo() {
   local clone_flags=$2
 
   if [ ! -d "$destination/.git" ]; then
-    log "Cloning into $destination"
+    log "Cloning into '$destination'"
 
     git clone $clone_flags "$uri" "$destination"
     cd $destination
   else
-    log "Reseting into $destination"
+    log "Reseting into '$destination'"
 
     cd $destination
     git reset --hard FETCH_HEAD
@@ -96,7 +96,7 @@ checkout_commit() {
   local commit=$1
   local checkout_flags=$2
 
-  log "Checking out to $commit"
+  log "Checking out to '$commit'"
 
   git checkout $checkout_flags $commit
 }
