@@ -80,12 +80,12 @@ clone_repo() {
   local clone_flags=$2
 
   if [ ! -d "$destination/.git" ]; then
-    log "Cloning $uri in $destination"
+    log "Cloning $uri into $destination"
 
     git clone $clone_flags "$uri" "$destination"
     cd $destination
   else
-    log "Reseting $uri in $destination"
+    log "Reseting $uri into $destination"
 
     cd $destination
     git reset --hard FETCH_HEAD
