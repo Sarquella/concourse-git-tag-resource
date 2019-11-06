@@ -30,6 +30,20 @@ filtered_tags=$(filter_tags "$tags" "$tag_filter")
 
 commits=$(get_commits "$filtered_tags")
 
+format_output() {
+  local tags=($1)
+  local commits=($2)
+
+  log "Formatting output"
+
+  output=""
+  for i in ${!tags[@]}; do
+    output+="{tag: \"${tags[$i]}\", commit: \"${commits[$i]}\"}"
+  done
+
+  echo "[$output]" | sed "s/}{/},{/g"
+}
+
 output=$(format_output "$filtered_tags" "$commits")
 
 jq -n "$output" >&3

@@ -137,20 +137,6 @@ get_commits() {
   done
 }
 
-format_output() {
-  local tags=($1)
-  local commits=($2)
-
-  log "Formatting output"
-
-  output=""
-  for i in ${!tags[@]}; do
-    output+="{tag: \"${tags[$i]}\", commit: \"${commits[$i]}\"}"
-  done
-
-  echo "[$output]" | sed "s/}{/},{/g"
-}
-
 add_git_metadata_basic() {
   local commit=$(git rev-parse HEAD | jq -R .)
   local author=$(git log -1 --format=format:%an | jq -s -R .)
