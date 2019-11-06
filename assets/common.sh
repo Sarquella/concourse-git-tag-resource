@@ -66,23 +66,39 @@ parse_source() {
   tag_filter=$(jq -r '.source.tag_filter // "*"' < $payload)
 }
 
+parse_version() {
+  local payload=$1
+
+  log "Parsing version"
+
+  tag=$(jq -r '.version.tag // ""' < $payload)
+  commit=$(jq -r '.version.commit // ""' < $payload)
+}
+
 clone_repo() {
   local destination=$1
-
-  # We're just checking for commits and tags; we don't ever need to fetch LFS files here!
-  export GIT_LFS_SKIP_SMUDGE=1
+  local clone_flags=$2
 
   if [ ! -d "$destination/.git" ]; then
-    log "Cloning $uri in $destination"
+    log "Cloning $uri into $destination"
 
-    git clone --single-branch "$uri" "$destination"
+    git clone $clone_flags "$uri" "$destination"
     cd $destination
   else
-    log "Reseting $uri in $destination"
+    log "Reseting $uri into $destination"
 
     cd $destination
     git reset --hard FETCH_HEAD
   fi
+}
+
+checkout_commit() {
+  local commit=$1
+  local checkout_flags=$2
+
+  log "Checking out to $commit"
+
+  git checkout $checkout_flags $commit
 }
 
 update_tags() {
@@ -112,9 +128,9 @@ filter_tags() {
 }
 
 get_commits() {
-  log "Retrieving commits"
-
   local tags=$1
+
+  log "Retrieving commits"
 
   for tag in $tags; do
     echo $(git rev-list -n 1 $tag)
@@ -122,10 +138,10 @@ get_commits() {
 }
 
 format_output() {
-  log "Formatting output"
-
   local tags=($1)
   local commits=($2)
+
+  log "Formatting output"
 
   output=""
   for i in ${!tags[@]}; do
@@ -133,4 +149,97 @@ format_output() {
   done
 
   echo "[$output]" | sed "s/}{/},{/g"
+}
+
+add_git_metadata_basic() {
+  local commit=$(git rev-parse HEAD | jq -R .)
+  local author=$(git log -1 --format=format:%an | jq -s -R .)
+  local author_date=$(git log -1 --format=format:%ai | jq -R .)
+
+  jq ". + [
+    {name: \"commit\", value: ${commit}},
+    {name: \"author\", value: ${author}},
+    {name: \"author_date\", value: ${author_date}, type: \"time\"}
+  ]"
+}
+
+add_git_metadata_committer() {
+  local author=$(git log -1 --format=format:%an | jq -s -R .)
+  local author_date=$(git log -1 --format=format:%ai | jq -R .)
+  local committer=$(git log -1 --format=format:%cn | jq -s -R .)
+  local committer_date=$(git log -1 --format=format:%ci | jq -R .)
+
+  if [ "$author" = "$committer" ] && [ "$author_date" = "$committer_date" ]; then
+    jq ". + [
+      {name: \"committer\", value: ${committer}},
+      {name: \"committer_date\", value: ${committer_date}, type: \"time\"}
+    ]"
+  else
+    cat
+  fi
+}
+
+add_git_metadata_branch() {
+  local branch=$(git show-ref --heads | \
+    sed -n "s/^$(git rev-parse HEAD) refs\/heads\/\(.*\)/\1/p" |  \
+    jq -R  ". | select(. != \"\")" | jq -r -s "map(.) | join (\",\")")
+
+  if [ -n "${branch}" ]; then
+    jq ". + [
+      {name: \"branch\", value: \"${branch}\"}
+    ]"
+  else
+    cat
+  fi
+}
+
+add_git_metadata_tags() {
+  local tags=$(git tag --points-at HEAD | \
+    jq -R  ". | select(. != \"\")" | \
+    jq -r -s "map(.) | join(\",\")")
+
+  if [ -n "${tags}" ]; then
+    jq ". + [
+      {name: \"tags\", value: \"${tags}\"}
+    ]"
+  else
+    cat
+  fi
+}
+
+add_git_metadata_message() {
+  local message=$(git log -1 --format=format:%B | jq -s -R .)
+
+  jq ". + [
+    {name: \"message\", value: ${message}, type: \"message\"}
+  ]"
+}
+
+add_git_metadata_url() {
+  local commit=$(git rev-parse HEAD)
+  local origin=$(git remote get-url --all origin) 2> /dev/null
+
+  if echo $origin | grep github.com > /dev/null; then
+
+    # git@github.com:concourse/git-resource.git     -> concourse/git-resource
+    # https://github.com/concourse/git-resource.git -> concourse/git-resource
+    local ownerRepo=$(echo $origin | sed -e' s/.*github.com[:\/]//; s/\.git$//')
+    local url=$(echo "https://github.com/$ownerRepo/commit/$commit" | jq -R . )
+
+    jq ". + [
+        {name: \"url\", value: ${url}}
+    ]"
+  else
+    jq ". + []"
+  fi
+}
+
+git_metadata() {
+  jq -n "[]" | \
+    add_git_metadata_basic | \
+    add_git_metadata_committer | \
+    add_git_metadata_branch | \
+    add_git_metadata_tags | \
+    add_git_metadata_message | \
+    add_git_metadata_url
 }
