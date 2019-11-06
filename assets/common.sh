@@ -77,11 +77,12 @@ parse_version() {
 
 clone_repo() {
   local destination=$1
+  local clone_flags=$2
 
   if [ ! -d "$destination/.git" ]; then
     log "Cloning $uri in $destination"
 
-    git clone --single-branch "$uri" "$destination"
+    git clone $clone_flags "$uri" "$destination"
     cd $destination
   else
     log "Reseting $uri in $destination"
