@@ -94,10 +94,11 @@ clone_repo() {
 
 checkout_commit() {
   local commit=$1
+  local checkout_flags=$2
 
   log "Checking out to $commit"
 
-  git checkout $commit
+  git checkout $checkout_flags $commit
 }
 
 update_tags() {
