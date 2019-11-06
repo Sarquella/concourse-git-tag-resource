@@ -80,12 +80,12 @@ clone_repo() {
   local clone_flags=$2
 
   if [ ! -d "$destination/.git" ]; then
-    log "Cloning $uri into $destination"
+    log "Cloning into '$destination'"
 
     git clone $clone_flags "$uri" "$destination"
     cd $destination
   else
-    log "Reseting $uri into $destination"
+    log "Reseting into '$destination'"
 
     cd $destination
     git reset --hard FETCH_HEAD
@@ -96,7 +96,7 @@ checkout_commit() {
   local commit=$1
   local checkout_flags=$2
 
-  log "Checking out to $commit"
+  log "Checking out to '$commit'"
 
   git checkout $checkout_flags $commit
 }
@@ -135,20 +135,6 @@ get_commits() {
   for tag in $tags; do
     echo $(git rev-list -n 1 $tag)
   done
-}
-
-format_output() {
-  local tags=($1)
-  local commits=($2)
-
-  log "Formatting output"
-
-  output=""
-  for i in ${!tags[@]}; do
-    output+="{tag: \"${tags[$i]}\", commit: \"${commits[$i]}\"}"
-  done
-
-  echo "[$output]" | sed "s/}{/},{/g"
 }
 
 add_git_metadata_basic() {
